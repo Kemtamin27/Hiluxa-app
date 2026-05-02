@@ -2424,6 +2424,10 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
         </div>
         `;
 
+        document.getElementById('yorum').innerHTML = html;
+        document.getElementById('sonuc').style.display = 'block';
+        setTimeout(() => document.getElementById('sonuc').scrollIntoView({behavior:'smooth'}), 100);
+
    } else {
         // ══════════════════════════════════════════════
         // SİNASTRİ RENDER (Genel Kullanıcılar) — TAM GELİŞTİRİLMİŞ
