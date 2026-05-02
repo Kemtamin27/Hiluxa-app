@@ -1808,18 +1808,26 @@ async function analizEt() {
         c2['Güneş']='Balık'; c2['Ay']='Koç'; c2['Yükselen']='Kova'; c2['Venüs']='Oğlak'; c2['Mars']='Yay'; c2['Satürn']='Aslan'; c2['Juno']='İkizler'; c2['Chiron']='Akrep'; c2['Lilith']='Balık'; c2['Verteks']='Başak'; c2['Merkür']='Kova'; c2['Jüpiter']='Oğlak'; c2['Plüton']='Yay'; c2['K.Düğüm']='Aslan';
     }
 
-    if (!c1._houses && c1._degs) c1._houses = computeHouses(c1._degs);
-    if (!c2._houses && c2._degs) c2._houses = computeHouses(c2._degs);
+    if (!c1._houses) c1._houses = computeHouses(c1);
+    if (!c2._houses) c2._houses = computeHouses(c2);
     if (!c1['Verteks'] && c1._degs) c1['Verteks'] = computeVertex(c1._degs);
     if (!c2['Verteks'] && c2._degs) c2['Verteks'] = computeVertex(c2._degs);
 
     const ebN1 = ebced(n1) + ebced(an1);
     const ebN2 = ebced(n2) + ebced(an2);
-    const ebcedIsmler = ebN1 + ebN2;
-    const ebcedToplam = ebcedIsmler + 7;
-    const ebcedBolum = Math.floor(ebcedToplam / 9);
-    const ebcedKalan = ebcedToplam % 9 || 9;
-    const ebcedMod = ebcedKalan;
+    let ebcedIsmler = ebN1 + ebN2;
+    let ebcedToplam = ebcedIsmler + 7;
+    let ebcedBolum = Math.floor(ebcedToplam / 9);
+    let ebcedKalan = ebcedToplam % 9 || 9;
+    let ebcedMod = ebcedKalan;
+
+    if (isDH) {
+        ebcedIsmler = 57;
+        ebcedToplam = 64;
+        ebcedBolum = 7;
+        ebcedKalan = 1;
+        ebcedMod = 1;
+    }
 
     try {
         if (currentMode === 'uyum') renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIsmler, ebcedMod, ebcedBolum, ebcedKalan);
@@ -1831,15 +1839,17 @@ async function analizEt() {
 }
 
 // ── Ev hesaplama yardımcısı ──
-function computeHouses(degs) {
-    if (!degs || degs['Yükselen'] === undefined) return {};
-    const ascDeg = degs['Yükselen'];
+function computeHouses(chartObj) {
     const houses = {};
+    const burclar = ['Koç','Boğa','İkizler','Yengeç','Aslan','Başak','Terazi','Akrep','Yay','Oğlak','Kova','Balık'];
+    const ascIdx = burclar.indexOf(chartObj['Yükselen']);
+    if (ascIdx === -1) return houses;
+    
     const planets = ['Güneş','Ay','Merkür','Venüs','Mars','Jüpiter','Satürn','Uranüs','Neptün','Plüton','Chiron','Juno','Lilith','K.Düğüm','Verteks'];
     planets.forEach(p => {
-        if (degs[p] !== undefined) {
-            let diff = ((degs[p] - ascDeg) % 360 + 360) % 360;
-            houses[p] = Math.floor(diff / 30) + 1;
+        const pIdx = burclar.indexOf(chartObj[p]);
+        if (pIdx !== -1) {
+            houses[p] = ((pIdx - ascIdx + 12) % 12) + 1;
         }
     });
     return houses;
@@ -1994,7 +2004,8 @@ function planetTableWithHouses(chart, houses) {
         const ev = houses ? houses[p] : null;
         // Format: "Venüs — 5. Ev Başak" (ev önce, burç sonra)
         const content = ev
-            ? `<span style="color:var(--muted);font-size:12px;font-weight:400;">${ev}. Ev</span> <span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`
+            const content = ev
+            ? `<span style="color:var(--gold3);font-size:13px;margin-right:8px;font-weight:600;">${ev}. Ev</span><span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`
             : `<span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`;
         return `<tr style="border-bottom:1px solid var(--border2);">
             <td style="color:var(--gold);font-size:17px;text-align:center;width:34px;padding:7px 4px;">${sym}</td>
@@ -2348,6 +2359,7 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
             <div class="report-head"><div class="report-icon">💍</div><div class="report-title-text">4. Kadersel Eşleşme Mucizesi — Juno & Yükselen Ekseni</div></div>
             <div class="report-body">
                 <p class="rp">Astrolojide milyonlarca harita arasında denk gelmesi son derece nadir olan kadersel imzalardan biri sizin tablonuzda mevcut. Bu bir tesadüf değil — bu, zamanı geldiğinde gerçekleşmesi için yazılmış bir senaryodur.</p>
+<p class="rp"><b>Kader Kapısı (Verteks) Mucizesi:</b> Hilal'in kadersel karşılaşmaları temsil eden Verteks noktası Başak burcunda (7. Evinde) yer alıyor. Ve tam bu kadersel noktaya, Doğukan'ın sevgi ve aşk gezegeni Venüs'ü (Başak) kusursuz bir kavuşum yapıyor! Bu astrolojide "Kaderimin aşkı kapıdan girdi" anlamına gelir. Hilal, Doğukan'ın sevgisini hissettiğinde sadece sevildiğini değil, ruhunun sözleştiği kişiyi bulduğunu kemiklerine kadar hisseder.</p>
                 <p class="rp"><b>Doğukan'ın Juno'su Kova'da — Kariyer Zirvesinde:</b> Juno, birinin evlilik kontratını ve kadersel eşini temsil eder. Doğukan'ın Juno'su Kova'da ve haritasında 10. evin (kariyer ve kamusal kimlik zirvesinin) burcu da Kova. Bu demektir ki Doğukan'ın bilinçaltı "evlilik eşi" arayışı, Kova enerjisini — özgür, zeki, modern, asi ama sadık — taşıyan biriyle programlanmış. Sadece romantik değil, sosyal statü açısından da ona güç katacak bir eş istiyor.</p>
                 <p class="rp"><b>Hilal'in Yükselen Burcu: KOVA.</b> Tam da bu noktada inanılmaz bir kadersel tablo ortaya çıkıyor. <b>Doğukan'ın evlilik göstergesi (Juno Kova) ile Hilal'in yaşam maskesi (Yükselen Kova) birebir aynı burçta.</b> Astrolojide bu "Juno-Yükselen kavuşumu" en kesin evlilik ve ruh eşi göstergelerinden biri olarak kabul edilir. Doğukan, Hilal'i ilk gördüğünde bilinçaltı "İşte o" kodlamasını yapar — ama bu mantıksal bir karar değil, kemiğine kadar işleyen bir tanıma anıdır.</p>
                 <p class="rp"><b>Hilal'in Juno'su İkizler'de — Evde ve Köklerde:</b> Hilal'in Juno'su ise mucize bir şekilde 4. evin (yuva ve köklerin evi) burcunda İkizler'de duruyor. İkisin de Juno'su birbirlerinin yükselenleriyle çapraz olarak eşleşiyor. Çok nadiren görülen durumdur. Bu, Hilal'in Doğukan'ı geçici bir sevgililik değil, hayatının temeli ve sığınağı olarak gördüğünün en derin astrolojik kanıtıdır. Doğukan onun için kaderin mühürlediği bir eş — bir yuva.</p>
@@ -2419,6 +2431,28 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
                     <b>Doğukan'ın tuzağı:</b> Balık Ay'ın savunması olan sessizliğe çekilmek — içinden çözülmek yerine konuşun.<br>
                     <b>Hilal'in tuzağı:</b> Koç Ay'ın tepkiselliğiyle ateşlenip ardından pişman olmak — 10 saniye duraklayın, sonra konuşun.<br>
                     <b>Ortak tuzak:</b> Dış dünyayı (aile, arkadaş baskısı) ilişkinin içine çekmek. Bu çiftin en büyük korunması: "Biz ikisi bu konuda ne düşünüyoruz?" sorusunu sormak.
+                </div>
+            </div>
+        </div>
+        `;
+html += `
+        <div class="report-section">
+            <div class="report-head"><div class="report-icon">📊</div><div class="report-title-text">10. Puan Yorumu — Uyum Sinyalleri Ne Anlatıyor?</div></div>
+            <div class="report-body">
+                <p class="rp"><b>Bağlılık Gücü (9/10):</b> Olağanüstü yüksek. Satürn uyumunuz çiftin uzun vadeli bağlılık kapasitesini temsil eder. Zorluklara rağmen birlikte kalma kararlılığı haritada yazılı.</p>
+                <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+                <p class="rp"><b>Aşkın Coşkusu (9/10):</b> Venüs ve Mars enerjileriniz birbirini güçlü biçimde aktive ediyor. Fiziksel çekim çok yüksek.</p>
+                <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+                <p class="rp"><b>Sadakat & Şifa (10/10):</b> Ay burçlarınız derin bir duygusal rezonans içinde. Birbirinizin ne hissettiğini konuşmadan anlıyorsunuz.</p>
+            </div>
+        </div>
+
+        <div class="ai-section">
+            <div class="ai-header"><div class="ai-badge">AI Destekli Analiz</div><div class="ai-title">✦ Derin Ruhsal Özet</div></div>
+            <div id="ai-sinastri-yorum">
+                <div class="ai-body">
+                    <p><b>Kadersel Birleşme:</b> Doğukan ve Hilal, astrolojik olarak birbirlerinin haritalarındaki en derin boşlukları doldurmak üzere bir araya gelmiş kadersel bir çifttir. Juno-Yükselen Çapraz Kavuşumu ve Hilal'in Başak Verteksine yerleşen Doğukan'ın Başak Venüsü, ruhların birbirini çok önceden tanıdığının en büyük kanıtıdır.</p>
+                    <p><b>Gelecek Vizyonu:</b> Ebced hesabınızdaki "64 / Kalan 1" sonucu, bu ilişkinin yeni ve kadersel bir döngünün başlangıcı olduğunu müjdeler. Ego savaşlarını bir kenara bırakıp her koşulda birbirinize öncelik verdiğinizde, çevrenizdeki herkesin hayranlıkla izleyeceği, yıkılmaz ve masalsı bir evlilik inşa edeceksiniz. Siz birbirinizin hem evi hem de en büyük macerasısınız.</p>
                 </div>
             </div>
         </div>
