@@ -1625,6 +1625,63 @@ function ozetAnalizUret(prompt) {
     const elemler = {'Koç':'Ateş','Aslan':'Ateş','Yay':'Ateş','Boğa':'Toprak','Başak':'Toprak','Oğlak':'Toprak','İkizler':'Hava','Terazi':'Hava','Kova':'Hava','Yengeç':'Su','Akrep':'Su','Balık':'Su'};
     const elemNitelik = {'Ateş':'cesaret, liderlik ve ateşli tutku','Toprak':'güvenilirlik, sabır ve somut inşa','Hava':'zekâ, iletişim ve esneklik','Su':'empati, sezgi ve derin duygusallık'};
 
+    // ---- YILDIZNAME MODU KONTROLÜ ----
+    if (prompt.includes('YILDIZNAME_MODU')) {
+        const cMatch = prompt.match(/Cinsiyet:\s*([^,]+)/);
+        const c = cMatch ? cMatch[1] : 'Erkek';
+        const bMatch = prompt.match(/Burç:\s*([^,]+)/);
+        const b = bMatch ? bMatch[1] : 'Koç';
+        const yMatch = prompt.match(/Yıldızı:\s*([^,]+)/);
+        const y = yMatch ? yMatch[1] : 'Merih';
+        const vMatch = prompt.match(/Vasfı:\s*([^.]+)/);
+        const v = vMatch ? vMatch[1] : '1';
+        const nmMatch = prompt.match(/İsim:\s*([^.]+)/);
+        const nm = nmMatch ? nmMatch[1] : 'Kişi';
+        
+        const isKadin = (c === 'Kadın');
+        const el = elemler[b] || 'Ateş';
+
+        return `
+        <p class="rp" style="text-align:justify;"><b>Bismillahirrahmanirrahim.</b> Bu zayiçe, <b>${nm}</b> ismindeki ${c} kişisi için tanzim olunmuştur. Yıldızı ${y}, tabiatı ${el} unsurundandır. ${v}. Vasfın tesiri altında doğduğundan mizaç olarak ${el==='Ateş'?'hararetli, cesaretli ve tez canlıdır.':el==='Toprak'?'sakin, sabırlı, vakur ve sebatkardır.':el==='Hava'?'münevver, tez zekalı, konuşkan ve değişkendir.':'hissiyatlı, derin, gizemli ve şefkatlidir.'} Aşağıda 12 hanesinin ahval ve şeraiti kadim ilimlere göre beyan edilmiştir:</p>
+        
+        <p class="rp"><b>1. Hane: HAYAT VE MAİŞETİNİZ:</b> Hayatınız umumiyetle mücadeleyle başlar, fakat ilerleyen yaşlarda büyük bir rahata kavuşursunuz. ${y} yıldızının tesiriyle niyetiniz saf ve temizdir. Dost görünce dost, düşman görünce kalkan olursunuz.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>2. Hane: MAL VE TİCARETİNİZ:</b> Rızkınız boldur. Ancak elinize geçen malı çabuk sarf etme meyliniz vardır. İhtiyarlıkta zahmet çekmemek için gençlikte tedbirli olmanız, israftan sakınmanız çok hayırlıdır.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>3. Hane: KARDEŞLERİNİZ:</b> Kardeşleriniz ve akrabalarınızla zaman zaman ihtilafa düşme ihtimaliniz vardır. Akrabadan ziyade kendi gayretinizle ve dost bildiklerinizden daha çok hayır görürsünüz.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>4. Hane: ANA VE BABA MÜNASEBETİ:</b> Ana ve babanıza hürmetkarsınız. ${isKadin ? 'Annelerinden' : 'Babalarından'} daha fazla sevgi ve şefkat görürler. Onların hayır duasını almak ömrünüzü bereketlendirir.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>5. Hane: EVLATLARINIZ:</b> Evlatlarınızın bazılarından çok büyük hürmet ve hayır görürsünüz. Onların terbiyesiyle bizzat alakadar olmanız sizin menfaatinizedir.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>6. Hane: HASTALIK VE İLLETLERİNİZ:</b> Tabiatınız ${el} olduğu için umumiyetle ${el==='Ateş'?'baş ağrısı, asabiyet ve hararet':el==='Toprak'?'mide, safra ve eklem rahatsızlıkları':el==='Hava'?'sinir sistemi, vesvese ve göğüs hastalıkları':'böbrek, ayak ve ruhsal daralmalar'} illetlerine karşı istidadınız vardır. Soğuktan ve vesveseden sakınmanız lazımdır.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>7. Hane: EVLİLİK HAYATI:</b> Evlilikte sadakat ararsınız. ${isKadin ? 'Zevcinize (eşinize) karşı çok fedakar olursunuz fakat kıymetinizin bilinmesi zaman alabilir.' : 'Ailenize karşı koruyucu olursunuz, yuvanızda sadece sükunet ve huzur ararsınız.'} Çoğu zaman evlilik hayatınızda sabreden taraf siz olursunuz.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>8. Hane: KORKU VE ÖLÜM TEHLİKESİ:</b> ${v === '1' ? '7, 14 ve 40' : v === '2' ? '5, 12, 28 ve 45' : '9, 21, 33 ve 50'} yaşlarında bazı atlatılması gereken badireler veya hastalıklar görünüyor. Bunları sadaka ve tevekkül ile atlatırsanız bereketli bir ömür sürmeniz mukadderdir.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>9. Hane: YOLCULUKLARINIZ:</b> Yolculuk yıldızınız açıktır. Deniz aşırı veya uzun yolculuklardan büyük menfaat sağlarsınız. Seyahate çıkarken perşembe veya cuma gününü seçmeniz hayırlı olur.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>10. Hane: İZZET VE İKBALİNİZ:</b> Devlet ve makam sahibi kimselerin indinde muteber olursunuz. İşinizde veya bulunduğunuz cemiyette hürmet görür, sözü dinlenen itibarlı bir şahsiyet olursunuz.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>11. Hane: EMEL VE ARZULARINIZ:</b> Gönlünüzden geçen muratlara bazen geç de olsa mutlaka nail olursunuz. Ancak sırrınızı ve niyetinizi herkese açmamalısınız, zira nazara ve hasede çok çabuk gelirsiniz.</p>
+        <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+        
+        <p class="rp"><b>12. Hane: DÜŞMAN VE HASEDCİLERİNİZ:</b> Düşmanlarınız ekseriya dışarıdan değil, yakın çevrenizden ve size dost görünenler arasından çıkar. Siz onlara iyilik ettikçe onlar nankörlük edebilir. Hilekarların oyunlarına karşı sırrınızı saklamalı ve daima Allah'a sığınmalısınız.</p>
+        `;
+    }
+    // ---- YILDIZNAME MODU KONTROLÜ SONU ----
+
     // Burç çekimi
     const gunesleri = burclar12.filter(b => prompt.includes('Güneş ' + b));
     const aylari = burclar12.filter(b => prompt.includes('Ay ' + b));
