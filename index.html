@@ -1704,7 +1704,7 @@ function setMode(mode) {
     const t1 = document.querySelector('#card1 .form-card-title span:last-child');
     const cinsiyetWrap = document.getElementById('cinsiyet-wrap');
 
-    cinsiyetWrap.style.display = 'none'; // Varsayılan olarak gizle
+    if(cinsiyetWrap) cinsiyetWrap.style.display = 'none';
 
     if (mode === 'bireysel') {
         card2.style.display = 'none';
@@ -1715,7 +1715,7 @@ function setMode(mode) {
         card2.style.display = 'none';
         grid.style.gridTemplateColumns = '1fr';
         t1.textContent = 'İlmi Nücum - Kadim Yıldızname';
-        cinsiyetWrap.style.display = 'block'; // Yıldıznamede cinsiyet görünür
+        if(cinsiyetWrap) cinsiyetWrap.style.display = 'block';
         btn.textContent = '✦   Yıldıznameyi Aç   ✦';
     } else if (mode === 'uyum') {
         card2.style.display = 'block';
@@ -1739,7 +1739,6 @@ function analiziBaslat() {
     if (kredi <= 0) { reklamModalAc(); return; }
     const t1 = document.getElementById('tarih1').value;
     if (!t1) { alert('Lütfen doğum tarihini girin.'); return; }
-    // DÜZELTME: Sadece 'uyum' veya 'kompozit' modlarındaysa 2. tarihi iste!
     if ((currentMode === 'uyum' || currentMode === 'kompozit') && !document.getElementById('tarih2').value) { 
         alert('Lütfen 2. kişinin doğum tarihini de girin.'); return; 
     }
@@ -1797,7 +1796,8 @@ async function analizEt() {
         return;
     }
     if (currentMode === 'yildizname') {
-        const cinsiyet = document.getElementById('cinsiyet1').value;
+        const cinsiyetEl = document.getElementById('cinsiyet1');
+        const cinsiyet = cinsiyetEl ? cinsiyetEl.value : 'Erkek';
         try { renderYildizname(n1, c1, cinsiyet); } catch(e) { console.error(e); alert('Yıldızname gösterim hatası: ' + e.message); }
         return;
     }
@@ -2902,23 +2902,20 @@ function showPrivacy() { document.getElementById('privacy-modal').style.display=
 function showTerms() { document.getElementById('terms-modal').style.display='flex'; }
 
 // ══════════════════════════════════════════════
-// 4. MOD: KADİM YILDIZNAME (GİZLİ İLİMLER HAZİNESİ)
+// 4. MOD: KADİM YILDIZNAME (İLMİ NÜCUM)
 // ══════════════════════════════════════════════
 function renderYildizname(name, chart, cinsiyet) {
     document.getElementById('score-section').innerHTML = '';
     
-    // Eski İslam Astrolojisi Gezegen İsimleri
     const eskiYildizlar = {
-        'Koç': 'Merih (Mars)', 'Boğa': 'Zühre (Venüs)', 'İkizler': 'Utarid (Merkür)',
-        'Yengeç': 'Ay', 'Aslan': 'Güneş', 'Başak': 'Utarid (Merkür)',
-        'Terazi': 'Zühre (Venüs)', 'Akrep': 'Merih (Mars)', 'Yay': 'Müşteri (Jüpiter)',
-        'Oğlak': 'Zühal (Satürn)', 'Kova': 'Zühal (Satürn)', 'Balık': 'Müşteri (Jüpiter)'
+        'Koç': 'Merih', 'Boğa': 'Zühre', 'İkizler': 'Utarid',
+        'Yengeç': 'Ay', 'Aslan': 'Güneş', 'Başak': 'Utarid',
+        'Terazi': 'Zühre', 'Akrep': 'Merih', 'Yay': 'Müşteri',
+        'Oğlak': 'Zühal', 'Kova': 'Zühal', 'Balık': 'Müşteri'
     };
 
     const burc = chart['Güneş'];
     const yildiz = eskiYildizlar[burc];
-    
-    // Güneşin derecesine göre "Vasf" hesabı (10'ar derecelik decanlar)
     const derece = chart._degs && chart._degs['Güneş'] ? Math.floor(chart._degs['Güneş'] % 30) : 15;
     let vasif = 1;
     if (derece >= 10 && derece < 20) vasif = 2;
@@ -2928,11 +2925,11 @@ function renderYildizname(name, chart, cinsiyet) {
         <div class="report-section">
             <div class="report-head">
                 <div class="report-icon">📜</div>
-                <div class="report-title-text">${name} — Kadim Yıldızname (İlmi Nücum)</div>
+                <div class="report-title-text">${name} — Kadim İlmi Nücum</div>
             </div>
             <div class="report-body">
                 <p class="rp" style="text-align:center; font-size:15px; margin-bottom:20px; font-style:italic; color:var(--gold2);">
-                    "Cenabı Hakk, Kur'an-ı Kerim'inde: 'Kul küllün ya'melü alâ şâkiletih' buyurmuştur. Her insan yaratılış şekline ve tabiatına göre amel işler."<br>— Gizli İlimler Hazinesi
+                    "Her insan, doğduğu anın gök kubbesindeki mühürle şekillenir ve kendi fıtratına göre bir kader yolu çizer."
                 </p>
                 <div class="insight-card">
                     <div class="insight-label">Kişi Bilgileri</div>
@@ -2946,13 +2943,13 @@ function renderYildizname(name, chart, cinsiyet) {
 
         <div class="ai-section">
             <div class="ai-header">
-                <div class="ai-badge">Kadim İlmi Nücum</div>
+                <div class="ai-badge">Kadim Hesaplama</div>
                 <div class="ai-title">✦ 12 Hane ve Hayat Yorumu</div>
             </div>
             <div id="ai-yildizname-yorum">
                 <div class="ai-loading">
                     <div class="ai-dots"><span></span><span></span><span></span></div>
-                    <span>Gizli İlimler Hazinesi referans alınarak 12 hane okunuyor…</span>
+                    <span>Yıldızname haneleri okunuyor…</span>
                 </div>
             </div>
         </div>
@@ -2962,33 +2959,14 @@ function renderYildizname(name, chart, cinsiyet) {
     document.getElementById('sonuc').style.display = 'block';
     setTimeout(() => document.getElementById('sonuc').scrollIntoView({behavior:'smooth'}), 100);
 
-    // AI'a "Gizli İlimler Hazinesi - 7. Kitap" formatında yorum yaptırıyoruz
-    const prompt = `Sen, eski dönem İslam Astrolojisi ve havas ilimleri uzmanı Mustafa İloğlu'sun ("Gizli İlimler Hazinesi" 7. cilt yazarı).
-Şimdi bana ${name} adlı kişi için bir Yıldızname çıkaracaksın.
-Kişi Bilgileri: Cinsiyet: ${cinsiyet}, Burç: ${burc}, Yıldızı: ${yildiz}, Vasfı: ${vasif}. Vasif.
-
-Lütfen yorumunu tam olarak Gizli İlimler Hazinesi üslubuyla, eski Türkçe kelimeler serpiştirerek (istidadı vardır, mizaçları, ahenk içinde olurlar vb.) ve KESİNLİKLE şu 12 Hane (Bölüm) başlığıyla yap:
-1. Hane: HAYAT VE MAİŞETİNİZ
-2. Hane: MAL VE TİCARETİNİZ
-3. Hane: KARDEŞLERİNİZ
-4. Hane: ANA VE BABA MÜNASEBETİ
-5. Hane: EVLADLARINIZ
-6. Hane: HASTALIK VE İLLETLERİNİZ
-7. Hane: EVLİLİK HAYATI
-8. Hane: KORKU VE ÖLÜM TEHLİKESİ
-9. Hane: YOLCULUKLARINIZ
-10. Hane: İZZET VE İKBALİNİZ
-11. Hane: EMEL VE ARZULARINIZ
-12. Hane: DÜŞMAN VE HASEDCİLERİNİZ
-
-ÖNEMLİ KURALLAR:
-- Cinsiyet ${cinsiyet} olduğu için, kitaptaki "${cinsiyet}ler İçin" kurallarına göre konuş.
-- ${vasif}. Vasfa göre karakterini kitabın üslubuyla (1 paragraf) giriş olarak yaz, sonra 12 haneye geç.
-- Hitabın mistik, ciddi ve kaderden bahseden bir tonda olsun. Tıbbi tavsiye gibi değil, "istidadı vardır, sakınmaları hayırlı olur" şeklinde yaz.`;
-
-    setTimeout(() => getAIYorum(prompt, 'ai-yildizname-yorum'), 500);
-}
-</script>
+    const prompt = `YILDIZNAME_MODU: Cinsiyet: ${cinsiyet}, Burç: ${burc}, Yıldızı: ${yildiz}, Vasfı: ${vasif}. Vasif. İsim: ${name}.`;
+    
+    // AI veya Yedek Motor Çağrısı
+    setTimeout(() => {
+        const result = ozetAnalizUret(prompt); // Hata payını sıfırlamak için direkt yedek motoru kullanıyoruz
+        document.getElementById('ai-yildizname-yorum').innerHTML = `<div class="ai-body">${result}</div>`;
+    }, 500);
+}</script>
 
 
 <!-- Privacy Modal -->

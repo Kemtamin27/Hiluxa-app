@@ -1,16 +1,7 @@
 {
   "name": "hiluxa-backend",
   "version": "1.0.0",
-  "description": "HILUXA Astroloji Motoru Backend",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "main": "api/index.js",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2"
