@@ -799,7 +799,7 @@ select option { background: #0a0f1a; }
         <div class="ornament-symbol">✦</div>
         <div class="ornament-line"></div>
     </div>
-    <div class="logo">HILUXA</div>
+    <div class="logo"><span style="font-size: 0.9em; margin-right: 8px;">☽</span>HILUXA</div>
     <div class="tagline">Astroloji · Kader · Ruhsal Yolculuk</div>
 </div>
 
@@ -1543,31 +1543,23 @@ function signTag(sign) {
 }
 
 function planetTable(c1, c2, n1, n2) {
-    const planetSymbols = {'Güneş':'☀','Ay':'☽','Yükselen':'↑','Merkür':'☿','Venüs':'♀','Mars':'♂','Jüpiter':'♃','Satürn':'♄','Uranüs':'⛢','Neptün':'♆','Plüton':'♇','Chiron':'⚷','Juno':'⚵','Lilith':'⚸','K.Düğüm':'☊'};
-    const rows = Object.keys(c1).filter(k=>k!=='_degs').map(k => {
-        const deg1 = c1._degs ? getDegreeInSign(c1._degs[k]) : '';
-        const deg2 = c2 && c2._degs ? getDegreeInSign(c2._degs[k]) : '';
+    const planetSymbols = {'Güneş':'☉','Ay':'☽','Yükselen':'↑','Merkür':'☿','Venüs':'♀','Mars':'♂','Jüpiter':'♃','Satürn':'♄','Uranüs':'♅','Neptün':'♆','Plüton':'♇','Chiron':'⚷','Juno':'⚵','Lilith':'⚸','K.Düğüm':'☊'};
+    const h1 = c1._houses || {};
+    const h2 = c2 && c2._houses ? c2._houses : {};
+    
+    const rows = Object.keys(c1).filter(k=>!k.startsWith('_')).map(k => {
         const sym = planetSymbols[k] || '';
-        const d1cell = deg1 ? `<span class="deg-badge">${deg1}</span>` : '';
-        const d2cell = deg2 ? `<span class="deg-badge">${deg2}</span>` : '';
-        return `<tr><td class="p-planet"><span style="opacity:0.6;margin-right:5px;">${sym}</span>${k}</td><td>${signTag(c1[k])}${d1cell}</td>${c2?`<td>${signTag(c2[k])}${d2cell}</td>`:''}</tr>`;
+        // Sinastri tablosunda da evler yazsın
+        const ev1 = h1[k] ? `<span style="color:var(--gold3);font-size:11px;margin-right:4px;">${h1[k]}.Ev</span>` : '';
+        const ev2 = h2[k] ? `<span style="color:var(--gold3);font-size:11px;margin-right:4px;">${h2[k]}.Ev</span>` : '';
+        return `<tr>
+            <td class="p-planet"><span style="opacity:0.6;margin-right:5px;">${sym}</span>${k}</td>
+            <td>${ev1}${signTag(c1[k])}</td>
+            ${c2 ? `<td>${ev2}${signTag(c2[k])}</td>` : ''}
+        </tr>`;
     }).join('');
-    const header = c2 ? `<th>Gezegen</th><th>${n1}</th><th>${n2}</th>` : `<th>Gezegen</th><th>Konum & Derece</th>`;
+    const header = c2 ? `<th>Gezegen</th><th>${n1}</th><th>${n2}</th>` : `<th>Gezegen</th><th>Konum</th>`;
     return `<div class="planet-table-wrap"><table class="planet-table"><tr>${header}</tr>${rows}</table></div>`;
-}
-
-function getStelliums(chart) {
-    const counts = {}, map = {};
-    for (const p in chart) {
-        if (['Yükselen','K.Düğüm','Lilith'].includes(p)) continue;
-        const s = chart[p];
-        counts[s] = (counts[s]||0)+1;
-        if (!map[s]) map[s] = [];
-        map[s].push(p);
-    }
-    const stels = [];
-    for (const s in counts) if (counts[s]>=3) stels.push(`<b>${s} Stelyumu</b> (${map[s].join(', ')})`);
-    return stels.length ? stels.join(' · ') : 'Haritanız dengeli, belirgin stelyum yok.';
 }
 
 // ══════════════════════════════════════════════
@@ -2066,14 +2058,13 @@ function planetTableWithHouses(chart, houses) {
         const e = elem[chart[p]] || '';
         const ev = houses && houses[p] ? houses[p] : null;
         
-        // DÜZELTİLEN KISIM: Sadece tek bir 'const content' var
+        // TAM İSTEDİĞİNİZ GİBİ: "3. Ev Güneş Aslan" FORMATI
         const content = ev
-            ? `<span style="color:var(--gold3);font-size:13px;margin-right:8px;font-weight:600;">${ev}. Ev</span><span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`
-            : `<span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`;
+            ? `<span style="color:var(--gold3); font-size:13px; margin-right:6px; font-weight:600;">${ev}. Ev</span><span style="font-weight:700; color:${elemColor[e]||'var(--text)'};">${p} ${chart[p]}</span>`
+            : `<span style="font-weight:700; color:${elemColor[e]||'var(--text)'};">${p} ${chart[p]}</span>`;
             
         return `<tr style="border-bottom:1px solid var(--border2);">
             <td style="color:var(--gold);font-size:17px;text-align:center;width:34px;padding:7px 4px;">${sym}</td>
-            <td style="font-size:13px;color:var(--muted);letter-spacing:1px;padding:7px 8px;">${p}</td>
             <td style="font-size:14px;padding:7px 4px;">${content}</td>
         </tr>`;
     }).join('');
@@ -2519,20 +2510,33 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
             </div>
         </div>
 
+        html += `
+        <div class="report-section">
+            <div class="report-head"><div class="report-icon">📊</div><div class="report-title-text">10. Puan Yorumu — Uyum Sinyalleri Ne Anlatıyor?</div></div>
+            <div class="report-body">
+                <p class="rp"><b>Bağlılık Gücü (9/10):</b> Olağanüstü yüksek. Satürn uyumunuz çiftin uzun vadeli bağlılık kapasitesini temsil eder. Zorluklara rağmen birlikte kalma kararlılığı haritada yazılı.</p>
+                <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+                <p class="rp"><b>Aşkın Coşkusu (9/10):</b> Venüs ve Mars enerjileriniz birbirini güçlü biçimde aktive ediyor. Fiziksel çekim çok yüksek.</p>
+                <div class="section-divider"><div class="line"></div><div class="dot"></div><div class="line"></div></div>
+                <p class="rp"><b>Sadakat & Şifa (10/10):</b> Ay burçlarınız derin bir duygusal rezonans içinde. Birbirinizin ne hissettiğini konuşmadan anlıyorsunuz.</p>
+            </div>
+        </div>
+        <div id="verteks-bolumu-dh"></div>
         <div class="ai-section">
             <div class="ai-header"><div class="ai-badge">AI Destekli Analiz</div><div class="ai-title">✦ Derin Ruhsal Özet</div></div>
-            <div id="ai-sinastri-yorum">
-                <div class="ai-body">
-                    <p><b>Kadersel Birleşme:</b> Doğukan ve Hilal, astrolojik olarak birbirlerinin haritalarındaki en derin boşlukları doldurmak üzere bir araya gelmiş kadersel bir çifttir. Juno-Yükselen Çapraz Kavuşumu ve Hilal'in Başak Verteksine yerleşen Doğukan'ın Başak Venüsü, ruhların birbirini çok önceden tanıdığının en büyük kanıtıdır.</p>
-                    <p><b>Gelecek Vizyonu:</b> Ebced hesabınızdaki "64 / Kalan 1" sonucu, bu ilişkinin yeni ve kadersel bir döngünün başlangıcı olduğunu müjdeler. Ego savaşlarını bir kenara bırakıp her koşulda birbirinize öncelik verdiğinizde, çevrenizdeki herkesin hayranlıkla izleyeceği, yıkılmaz ve masalsı bir evlilik inşa edeceksiniz. Siz birbirinizin hem evi hem de en büyük macerasısınız.</p>
-                </div>
-            </div>
+            <div id="ai-sinastri-yorum-dh"><div class="ai-loading"><div class="ai-dots"><span></span><span></span><span></span></div><span>Kişiselleştirilmiş yorum hazırlanıyor…</span></div></div>
         </div>
         `;
 
         document.getElementById('yorum').innerHTML = html;
         document.getElementById('sonuc').style.display = 'block';
         setTimeout(() => document.getElementById('sonuc').scrollIntoView({behavior:'smooth'}), 100);
+
+        const vb = document.getElementById('verteks-bolumu-dh');
+        if (vb) vb.innerHTML = verteksBagYorum(c1, c2, n1, n2);
+
+        const aiPromptSinDH = "Sen Türkiye'nin en iyi astroloji uzmanısın. Doğukan ve Hilal için kişiselleştirilmiş bir sinastri yorumu yaz. Kadersel birleşme, Juno-Yükselen çapraz kavuşumu ve Verteks-Venüs bağından bahset. 3-4 paragraf şiirsel anlatım yap.";
+        setTimeout(() => getAIYorum(aiPromptSinDH, 'ai-sinastri-yorum-dh'), 500);
 
    } else {
         // ══════════════════════════════════════════════
@@ -2800,9 +2804,8 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
         const aiPromptSin = `Sen Türkiye'nin en iyi astroloji uzmanısın. ${n1} ve ${n2} için kişiselleştirilmiş bir sinastri (uyum) yorumu yaz. Akıcı ve şiirsel 3-4 paragraf.
 ${n1}: Güneş ${c1['Güneş']}${e1('Güneş')}, Ay ${c1['Ay']}${e1('Ay')}, Yükselen ${c1['Yükselen']}, Venüs ${c1['Venüs']}${e1('Venüs')}, Mars ${c1['Mars']}${e1('Mars')}
 ${n2}: Güneş ${c2['Güneş']}${e2('Güneş')}, Ay ${c2['Ay']}${e2('Ay')}, Yükselen ${c2['Yükselen']}, Venüs ${c2['Venüs']}${e2('Venüs')}, Mars ${c2['Mars']}${e2('Mars')}
-Gezegenlerin ev konumlarını da dikkate al. İlk tanışmada birbirlerine ne hissettirdiklerini, aşk dillerini ve uzun vadeli potansiyellerini anlat.`;
-
-    setTimeout(() => getAIYorum(aiPromptSin, 'ai-sinastri-yorum'), 500);
+Lütfen gezegenlerin bulunduğu ev konumlarını (Örneğin: Güneş Aslan 3. Evde) da dikkate alarak yorumla. İlk tanışmada birbirlerine ne hissettirdiklerini, aşk dillerini ve uzun vadeli potansiyellerini anlat.`;
+        setTimeout(() => getAIYorum(aiPromptSin, 'ai-sinastri-yorum'), 500);
     } // end else block
 } // end renderUyum
 
@@ -3014,13 +3017,12 @@ function renderYildizname(name, chart, cinsiyet) {
     document.getElementById('sonuc').style.display = 'block';
     setTimeout(() => document.getElementById('sonuc').scrollIntoView({behavior:'smooth'}), 100);
 
-    const prompt = `YILDIZNAME_MODU: Cinsiyet: ${cinsiyet}, Burç: ${burc}, Yıldızı: ${yildiz}, Vasfı: ${vasif}. Vasif. İsim: ${name}.`;
+    const prompt = `YILDIZNAME_MODU_ZENGINLESTIR: Cinsiyet: ${cinsiyet}, Burç: ${burc}, Yıldızı: ${yildiz}, Vasfı: ${vasif}. Vasif. İsim: ${name}.
+    Görev: Kadim İslam Astrolojisi (Gizli İlimler Hazinesi) kurallarına göre 12 hanelik Yıldızname yorumunu yazacaksın.
+    KURAL: 12 hanenin orijinal taslağına ve anlamlarına (Maişet, Kardeşler, Evlat, Düşman vb.) kesinlikle sadık kal! Fakat bunları kısa cümlelerle geçiştirme. Yapay zeka yeteneğini kullanarak bu 12 haneyi modern bir psikolojik dil, edebi bir anlatım ve detaylı kader analizleriyle genişlet. Her haneyi en az 3-4 dolgun cümleyle açıkla. Hitabın mistik, ciddi ve derin olsun. "1. Hane: ..." şeklinde sırasıyla yaz.`;
     
     // AI veya Yedek Motor Çağrısı
-    setTimeout(() => {
-        const result = ozetAnalizUret(prompt); // Hata payını sıfırlamak için direkt yedek motoru kullanıyoruz
-        document.getElementById('ai-yildizname-yorum').innerHTML = `<div class="ai-body">${result}</div>`;
-    }, 500);
+    setTimeout(() => getAIYorum(prompt, 'ai-yildizname-yorum'), 500);
 }</script>
 
 
