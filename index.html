@@ -1739,7 +1739,10 @@ function analiziBaslat() {
     if (kredi <= 0) { reklamModalAc(); return; }
     const t1 = document.getElementById('tarih1').value;
     if (!t1) { alert('Lütfen doğum tarihini girin.'); return; }
-    if (currentMode !== 'bireysel' && !document.getElementById('tarih2').value) { alert('Lütfen 2. kişinin doğum tarihini de girin.'); return; }
+    // DÜZELTME: Sadece 'uyum' veya 'kompozit' modlarındaysa 2. tarihi iste!
+    if ((currentMode === 'uyum' || currentMode === 'kompozit') && !document.getElementById('tarih2').value) { 
+        alert('Lütfen 2. kişinin doğum tarihini de girin.'); return; 
+    }
 
     krediGuncelle(-1);
     document.getElementById('sonuc').style.display = 'none';
