@@ -1388,6 +1388,8 @@ function getDegreeInSign(deg) {
 // ══════════════════════════════════════════════
 // BACKEND API — GEZEGEN HESAPLAMA
 // ══════════════════════════════════════════════
+// Vercel'de frontend ve backend aynı domain'de olduğu için boş bırakıyoruz.
+// Eğer ayrı bir domain kullanıyorsan: const BACKEND_URL = 'https://hiluxa-backend.vercel.app';
 const BACKEND_URL = '';
 
 async function calculateChart(year, month, day, hourStr, city) {
