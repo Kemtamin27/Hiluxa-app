@@ -817,6 +817,7 @@ select option { background: #0a0f1a; }
     <button class="tab-btn" id="btn-bireysel" onclick="setMode('bireysel')">☽ Doğum Haritası</button>
     <button class="tab-btn active" id="btn-uyum" onclick="setMode('uyum')">♾ Sinastri</button>
     <button class="tab-btn" id="btn-kompozit" onclick="setMode('kompozit')">◉ Kompozit</button>
+    <button class="tab-btn" id="btn-yildizname" onclick="setMode('yildizname')">📜 Yıldızname</button>
 </div>
 
 <!-- FORM -->
@@ -827,6 +828,13 @@ select option { background: #0a0f1a; }
             <div class="form-card-title"><span class="planet-icon">☀</span> <span id="title-card1">1. Kişi — Eril Enerji</span></div>
             <div class="input-wrap"><label class="input-label">İsim</label><input type="text" id="isim1" placeholder="Adınızı girin"></div>
             <div class="input-wrap"><label class="input-label">Anne Adı</label><input type="text" id="anne1" placeholder="Annenizin adı"></div>
+            <div class="input-wrap" id="cinsiyet-wrap" style="display:none;">
+                <label class="input-label">Cinsiyet (Yıldızname İçin)</label>
+                <select id="cinsiyet1">
+                    <option value="Erkek">Erkek</option>
+                    <option value="Kadın">Kadın</option>
+                </select>
+            </div>
             <div class="input-wrap"><label class="input-label">Doğum Şehri</label>
                 <input list="sehirler" id="sehir1" placeholder="Örn: Istanbul">
             </div>
@@ -1694,11 +1702,21 @@ function setMode(mode) {
     const grid = document.getElementById('form-grid');
     const btn = document.getElementById('btn-analiz');
     const t1 = document.querySelector('#card1 .form-card-title span:last-child');
+    const cinsiyetWrap = document.getElementById('cinsiyet-wrap');
+
+    cinsiyetWrap.style.display = 'none'; // Varsayılan olarak gizle
+
     if (mode === 'bireysel') {
         card2.style.display = 'none';
         grid.style.gridTemplateColumns = '1fr';
         t1.textContent = 'Kişisel Doğum Haritası';
         btn.textContent = '✦   Doğum Haritamı Çıkar   ✦';
+    } else if (mode === 'yildizname') {
+        card2.style.display = 'none';
+        grid.style.gridTemplateColumns = '1fr';
+        t1.textContent = 'İlmi Nücum - Kadim Yıldızname';
+        cinsiyetWrap.style.display = 'block'; // Yıldıznamede cinsiyet görünür
+        btn.textContent = '✦   Yıldıznameyi Aç   ✦';
     } else if (mode === 'uyum') {
         card2.style.display = 'block';
         grid.style.gridTemplateColumns = '';
@@ -1773,6 +1791,11 @@ async function analizEt() {
 
     if (currentMode === 'bireysel') {
         try { renderBireysel(n1, c1); } catch(e) { console.error(e); alert('Harita gösterim hatası: ' + e.message); }
+        return;
+    }
+    if (currentMode === 'yildizname') {
+        const cinsiyet = document.getElementById('cinsiyet1').value;
+        try { renderYildizname(n1, c1, cinsiyet); } catch(e) { console.error(e); alert('Yıldızname gösterim hatası: ' + e.message); }
         return;
     }
 
@@ -2001,12 +2024,13 @@ function planetTableWithHouses(chart, houses) {
     const rows = planets.map(([p,sym]) => {
         if (!chart[p]) return '';
         const e = elem[chart[p]] || '';
-        const ev = houses ? houses[p] : null;
-        // Format: "Venüs — 5. Ev Başak" (ev önce, burç sonra)
+        const ev = houses && houses[p] ? houses[p] : null;
+        
+        // DÜZELTİLEN KISIM: Sadece tek bir 'const content' var
         const content = ev
-            const content = ev
             ? `<span style="color:var(--gold3);font-size:13px;margin-right:8px;font-weight:600;">${ev}. Ev</span><span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`
             : `<span style="font-weight:700;color:${elemColor[e]||'var(--text)'};">${chart[p]}</span>`;
+            
         return `<tr style="border-bottom:1px solid var(--border2);">
             <td style="color:var(--gold);font-size:17px;text-align:center;width:34px;padding:7px 4px;">${sym}</td>
             <td style="font-size:13px;color:var(--muted);letter-spacing:1px;padding:7px 8px;">${p}</td>
@@ -2435,7 +2459,8 @@ function renderUyum(n1, n2, c1, c2, isDH, baglilik, askCoskusu, sadakat, ebcedIs
             </div>
         </div>
         `;
-html += `
+
+        html += `
         <div class="report-section">
             <div class="report-head"><div class="report-icon">📊</div><div class="report-title-text">10. Puan Yorumu — Uyum Sinyalleri Ne Anlatıyor?</div></div>
             <div class="report-body">
@@ -2872,6 +2897,94 @@ function renderKompozit(n1, n2, c1, c2) {
 
 function showPrivacy() { document.getElementById('privacy-modal').style.display='flex'; }
 function showTerms() { document.getElementById('terms-modal').style.display='flex'; }
+
+// ══════════════════════════════════════════════
+// 4. MOD: KADİM YILDIZNAME (GİZLİ İLİMLER HAZİNESİ)
+// ══════════════════════════════════════════════
+function renderYildizname(name, chart, cinsiyet) {
+    document.getElementById('score-section').innerHTML = '';
+    
+    // Eski İslam Astrolojisi Gezegen İsimleri
+    const eskiYildizlar = {
+        'Koç': 'Merih (Mars)', 'Boğa': 'Zühre (Venüs)', 'İkizler': 'Utarid (Merkür)',
+        'Yengeç': 'Ay', 'Aslan': 'Güneş', 'Başak': 'Utarid (Merkür)',
+        'Terazi': 'Zühre (Venüs)', 'Akrep': 'Merih (Mars)', 'Yay': 'Müşteri (Jüpiter)',
+        'Oğlak': 'Zühal (Satürn)', 'Kova': 'Zühal (Satürn)', 'Balık': 'Müşteri (Jüpiter)'
+    };
+
+    const burc = chart['Güneş'];
+    const yildiz = eskiYildizlar[burc];
+    
+    // Güneşin derecesine göre "Vasf" hesabı (10'ar derecelik decanlar)
+    const derece = chart._degs && chart._degs['Güneş'] ? Math.floor(chart._degs['Güneş'] % 30) : 15;
+    let vasif = 1;
+    if (derece >= 10 && derece < 20) vasif = 2;
+    if (derece >= 20) vasif = 3;
+
+    let html = `
+        <div class="report-section">
+            <div class="report-head">
+                <div class="report-icon">📜</div>
+                <div class="report-title-text">${name} — Kadim Yıldızname (İlmi Nücum)</div>
+            </div>
+            <div class="report-body">
+                <p class="rp" style="text-align:center; font-size:15px; margin-bottom:20px; font-style:italic; color:var(--gold2);">
+                    "Cenabı Hakk, Kur'an-ı Kerim'inde: 'Kul küllün ya'melü alâ şâkiletih' buyurmuştur. Her insan yaratılış şekline ve tabiatına göre amel işler."<br>— Gizli İlimler Hazinesi
+                </p>
+                <div class="insight-card">
+                    <div class="insight-label">Kişi Bilgileri</div>
+                    <p class="rp" style="margin-top:0;"><b>Cinsiyet:</b> ${cinsiyet}</p>
+                    <p class="rp"><b>Burcu:</b> ${burc}</p>
+                    <p class="rp"><b>Yıldızı (Yöneticisi):</b> ${yildiz}</p>
+                    <p class="rp"><b>Doğum Vasfı:</b> ${vasif}. Vasif (Güneşin ${derece}. Derecesi)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-section">
+            <div class="ai-header">
+                <div class="ai-badge">Kadim İlmi Nücum</div>
+                <div class="ai-title">✦ 12 Hane ve Hayat Yorumu</div>
+            </div>
+            <div id="ai-yildizname-yorum">
+                <div class="ai-loading">
+                    <div class="ai-dots"><span></span><span></span><span></span></div>
+                    <span>Gizli İlimler Hazinesi referans alınarak 12 hane okunuyor…</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('yorum').innerHTML = html;
+    document.getElementById('sonuc').style.display = 'block';
+    setTimeout(() => document.getElementById('sonuc').scrollIntoView({behavior:'smooth'}), 100);
+
+    // AI'a "Gizli İlimler Hazinesi - 7. Kitap" formatında yorum yaptırıyoruz
+    const prompt = `Sen, eski dönem İslam Astrolojisi ve havas ilimleri uzmanı Mustafa İloğlu'sun ("Gizli İlimler Hazinesi" 7. cilt yazarı).
+Şimdi bana ${name} adlı kişi için bir Yıldızname çıkaracaksın.
+Kişi Bilgileri: Cinsiyet: ${cinsiyet}, Burç: ${burc}, Yıldızı: ${yildiz}, Vasfı: ${vasif}. Vasif.
+
+Lütfen yorumunu tam olarak Gizli İlimler Hazinesi üslubuyla, eski Türkçe kelimeler serpiştirerek (istidadı vardır, mizaçları, ahenk içinde olurlar vb.) ve KESİNLİKLE şu 12 Hane (Bölüm) başlığıyla yap:
+1. Hane: HAYAT VE MAİŞETİNİZ
+2. Hane: MAL VE TİCARETİNİZ
+3. Hane: KARDEŞLERİNİZ
+4. Hane: ANA VE BABA MÜNASEBETİ
+5. Hane: EVLADLARINIZ
+6. Hane: HASTALIK VE İLLETLERİNİZ
+7. Hane: EVLİLİK HAYATI
+8. Hane: KORKU VE ÖLÜM TEHLİKESİ
+9. Hane: YOLCULUKLARINIZ
+10. Hane: İZZET VE İKBALİNİZ
+11. Hane: EMEL VE ARZULARINIZ
+12. Hane: DÜŞMAN VE HASEDCİLERİNİZ
+
+ÖNEMLİ KURALLAR:
+- Cinsiyet ${cinsiyet} olduğu için, kitaptaki "${cinsiyet}ler İçin" kurallarına göre konuş.
+- ${vasif}. Vasfa göre karakterini kitabın üslubuyla (1 paragraf) giriş olarak yaz, sonra 12 haneye geç.
+- Hitabın mistik, ciddi ve kaderden bahseden bir tonda olsun. Tıbbi tavsiye gibi değil, "istidadı vardır, sakınmaları hayırlı olur" şeklinde yaz.`;
+
+    setTimeout(() => getAIYorum(prompt, 'ai-yildizname-yorum'), 500);
+}
 </script>
 
 
